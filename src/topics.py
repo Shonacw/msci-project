@@ -5,8 +5,12 @@ import matplotlib.pyplot as plt
 from pprint import pprint
 from collections import defaultdict
 from sklearn.cluster import DBSCAN
-from utils import load_one_transcript
 
+
+#from utils import load_one_transcript
+import importlib
+utils = importlib.import_module("msci-project.src.utils")
+load_one_transcript = utils.load_one_transcript
 #%%
 class Network:
     def __init__(self, cutoff):

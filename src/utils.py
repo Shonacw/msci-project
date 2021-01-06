@@ -9,8 +9,15 @@ import pandas as pd
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from swda import CorpusReader
-from mappings import get_id2tag
+
+
+# from swda import CorpusReader
+# from mappings import get_id2tag
+import importlib
+swda = importlib.import_module("msci-project.src.swda")
+CorpusReader = swda.CorpusReader
+mappings = importlib.import_module("msci-project.src.mappings")
+get_id2tag = mappings.get_id2tag
 
 def load_pretrained_glove(path):
 
