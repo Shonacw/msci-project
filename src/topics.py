@@ -86,6 +86,7 @@ def plot_similarity(labels, features, rotation):
         vmax=1,
         cmap="YlOrRd")
     g.ax_heatmap.set_title("Clustered Semantic Textual Similarity")
+    plt.show()
 
 #some test sentences
 sentences = [
