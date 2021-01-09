@@ -5,11 +5,25 @@ import re
 import os
 
 import tensorflow as tf
-from utils import get_embedding_matrix, get_tokenizer, \
-    make_model_readable_X, load_all_transcripts, merge_offset_arrays, load_one_transcript
-from bilstm_crf import get_bilstm_crf_model
-from mappings import get_id2tag, get_tag2full_label
-import config
+import importlib
+utils = importlib.import_module("msci-project.src.utils")
+get_embedding_matrix = utils.get_embedding_matrix
+get_tokenizer = utils.get_tokenizer
+get_tokenizer = utils.get_tokenizer
+make_model_readable_X = utils.make_model_readable_X
+load_all_transcripts = utils.load_all_transcripts
+merge_offset_arrays = utils.merge_offset_arrays
+load_one_transcript = utils.load_one_transcript
+
+bilstm_crf = importlib.import_module("msci-project.src.bilstm_crf")
+get_bilstm_crf_model = bilstm_crf.get_bilstm_crf_model
+
+mappings = importlib.import_module("msci-project.src.mappings")
+get_id2tag = mappings.get_id2tag
+get_tag2full_label = mappings.get_tag2full_label
+
+config = importlib.import_module("msci-project.src.config")
+
 
 max_nr_utterances = config.data["max_nr_utterances"]
 max_nr_words = config.data["max_nr_words"]
@@ -92,7 +106,7 @@ if __name__ == '__main__':
     #transcripts = load_all_transcripts(chunked=True, chunk_size=max_nr_utterances)
     #annotated_transcripts = [make_annotated_transcript(t) for t in transcripts]
 
-    transcript = load_one_transcript("../transcripts/joe_rogan_elon_musk.txt",
+    transcript = load_one_transcript("/Users/ShonaCW/Desktop/Imperial/YEAR 4/MSci Project/Conversation_Analysis_Project/msci-project/transcripts/joe_rogan_elon_musk.txt",
         chunked=True, chunk_size=max_nr_utterances)
     annotated_transcript = make_annotated_transcript(transcript)
     annotated_transcript
