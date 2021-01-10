@@ -141,7 +141,7 @@ def get_all_texts():
     all_texts += sum(load_mrda_data()[0], [])
     all_texts += sum(load_swda_data()[0], [])
     all_texts += sum(load_all_transcripts(chunked = False), [])
-    all_texts = [" ".join(nltk.word_tokenize(s)) for s in all_texts]
+    all_texts = [" ".join(nltk.word_tokenize(str(s))) for s in all_texts]
     return all_texts
 
 def turn_tags_to_id(labels, tag2id):
@@ -222,9 +222,10 @@ def load_mrda_data(detail_level = 0):
 
         for fname in filenames:
             fpath = dir + "/" + fname
-
+            print('fpath', fpath)
             with open(fpath, "r") as f:
                 lines = f.readlines()
+                print(lines)
 
             split_lines = [l.split("|") for l in lines]
             utterances = [l[1] for l in split_lines]

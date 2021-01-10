@@ -9,7 +9,6 @@ import importlib
 utils = importlib.import_module("msci-project.src.utils")
 get_embedding_matrix = utils.get_embedding_matrix
 get_tokenizer = utils.get_tokenizer
-get_tokenizer = utils.get_tokenizer
 make_model_readable_X = utils.make_model_readable_X
 load_all_transcripts = utils.load_all_transcripts
 merge_offset_arrays = utils.merge_offset_arrays
@@ -62,7 +61,8 @@ def make_annotated_transcript(transcript, verbose = False):
                     offset_flattened_X.shape[-1]))
 
     # import pretrained GloVe embeddings
-    embedding_matrix = get_embedding_matrix("../data/embeddings/glove.840B.300d.txt",
+    #SGCW: CHANGED ../data/embeddings/glove.840B.300d.txt ->
+    embedding_matrix = get_embedding_matrix("/Users/ShonaCW/Desktop/Imperial/YEAR 4/MSci Project/Conversation_Analysis_Project/GloVe/glove.6B.300d.txt",
         word2id, force_rebuild=False) #set force rebuild to False when not changing total vocabulary
 
     os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"

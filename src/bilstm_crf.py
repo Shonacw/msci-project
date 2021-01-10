@@ -3,8 +3,8 @@ from keras.models import Model, Input
 from keras.layers import LSTM, Embedding, Dense, TimeDistributed, Dropout, Bidirectional, Conv1D, MaxPooling1D, Flatten, AveragePooling1D
 from keras.optimizers import Adam, schedules
 from tf2crf import CRF
-
-import config
+import importlib
+config = importlib.import_module("msci-project.src.config")
 
 def get_bilstm_crf_model(embedding_matrix, max_nr_utterances, max_nr_words, n_tags, verbose=False):
     print("loading model...")
