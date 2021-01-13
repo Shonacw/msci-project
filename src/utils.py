@@ -253,7 +253,7 @@ def load_all_transcripts(transcript_dir = "../transcripts/", chunked = True,
     return transcripts
 
 
-def check_coverage(vocab,embeddings_index):
+def check_coverage(vocab, embeddings_index):
     #checks what fraction of words in vocab are in the embeddings
     a = {}
     oov = {}
