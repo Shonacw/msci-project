@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a3177542-c8f9-41c0-8834-0303be7c15a9" name="Default Changelist" comment="" />
+    <list default="true" id="a3177542-c8f9-41c0-8834-0303be7c15a9" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="jonas-scholz123-master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1mhHSXMJIq1vaU1vtwP5WMtbBdF" />
@@ -19,6 +26,8 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -31,7 +40,47 @@
       <option name="presentableId" value="Default" />
       <updated>1609938902505</updated>
       <workItem from="1609938903864" duration="2000" />
+      <workItem from="1611225442344" duration="526000" />
     </task>
+    <task id="LOCAL-00001" summary="deleted files">
+      <created>1611225690367</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1611225690367</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Merge branch 'master' of https://github.com/jonas-scholz123/msci-project&#10;&#10;# Conflicts:&#10;#&#9;src/predictDA.py&#10;#&#9;src/topics.py&#10;#&#9;src/utils.py" />
+    <MESSAGE value="-" />
+    <MESSAGE value="deleted files" />
+    <option name="LAST_COMMIT_MESSAGE" value="deleted files" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="155" y="23" key="CommitChangelistDialog2" timestamp="1611225690276">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="155" y="23" key="CommitChangelistDialog2/0.23.1440.820@0.23.1440.820" timestamp="1611225690276" />
+    <state x="150" y="94" key="DiffContextDialog" timestamp="1611225642188">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="150" y="94" key="DiffContextDialog/0.23.1440.820@0.23.1440.820" timestamp="1611225642188" />
+    <state x="326" y="173" key="Vcs.Push.Dialog.v2" timestamp="1611225862884">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="326" y="173" key="Vcs.Push.Dialog.v2/0.23.1440.820@0.23.1440.820" timestamp="1611225862884" />
+    <state x="514" y="354" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611225761877">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="514" y="354" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.820@0.23.1440.820" timestamp="1611225761877" />
+    <state x="526" y="329" key="git4idea.remote.GitConfigureRemotesDialog" timestamp="1611225852962">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="526" y="329" key="git4idea.remote.GitConfigureRemotesDialog/0.23.1440.820@0.23.1440.820" timestamp="1611225852962" />
   </component>
 </project>
