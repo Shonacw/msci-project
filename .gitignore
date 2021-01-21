@@ -1,11 +1,11 @@
 src/__pycache__/
 src/grab_data
-data/
 archive/
+data/
 dialogue-understanding/
 logs/
-trained_model/
 DAH/
 swda/
 Probabilistic-RNN-DA-Classifier/
-helper_files/
+embeddings/
+helper_files/glove.840B.300d.pkl
