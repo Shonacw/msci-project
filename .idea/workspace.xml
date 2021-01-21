@@ -12,11 +12,12 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="jonas-scholz123-master" />
+        <entry key="$PROJECT_DIR$" value="b623768bc95ae68dd2776d192403c7bc4c997c52" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="JupyterTrust" id="fa31b4a8-03ee-47f0-aa63-edbe233e8e1e" />
   <component name="ProjectId" id="1mhHSXMJIq1vaU1vtwP5WMtbBdF" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -25,9 +26,34 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
+  </component>
+  <component name="RunManager">
+    <configuration type="PythonConfigurationType" factoryName="Python">
+      <module name="msci-project" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/opencv4/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/predictDA.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -40,7 +66,8 @@
       <option name="presentableId" value="Default" />
       <updated>1609938902505</updated>
       <workItem from="1609938903864" duration="2000" />
-      <workItem from="1611225442344" duration="526000" />
+      <workItem from="1611225442344" duration="1679000" />
+      <workItem from="1611227678456" duration="936000" />
     </task>
     <task id="LOCAL-00001" summary="deleted files">
       <created>1611225690367</created>
@@ -49,7 +76,21 @@
       <option name="project" value="LOCAL" />
       <updated>1611225690367</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="?">
+      <created>1611226299821</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1611226299821</updated>
+    </task>
+    <task id="LOCAL-00003" summary="-">
+      <created>1611226965435</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1611226965435</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -57,30 +98,63 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Merge branch 'master' of https://github.com/jonas-scholz123/msci-project&#10;&#10;# Conflicts:&#10;#&#9;src/predictDA.py&#10;#&#9;src/topics.py&#10;#&#9;src/utils.py" />
-    <MESSAGE value="-" />
     <MESSAGE value="deleted files" />
-    <option name="LAST_COMMIT_MESSAGE" value="deleted files" />
+    <MESSAGE value="?" />
+    <MESSAGE value="trying merge" />
+    <MESSAGE value="-" />
+    <option name="LAST_COMMIT_MESSAGE" value="-" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="155" y="23" key="CommitChangelistDialog2" timestamp="1611225690276">
+    <state x="190" y="94" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1611228577758">
       <screen x="0" y="23" width="1440" height="820" />
     </state>
-    <state x="155" y="23" key="CommitChangelistDialog2/0.23.1440.820@0.23.1440.820" timestamp="1611225690276" />
+    <state x="190" y="94" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.820@0.23.1440.820" timestamp="1611228577758" />
+    <state x="155" y="23" key="CommitChangelistDialog2" timestamp="1611226965293">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="155" y="23" key="CommitChangelistDialog2/0.23.1440.820@0.23.1440.820" timestamp="1611226965293" />
     <state x="150" y="94" key="DiffContextDialog" timestamp="1611225642188">
       <screen x="0" y="23" width="1440" height="820" />
     </state>
     <state x="150" y="94" key="DiffContextDialog/0.23.1440.820@0.23.1440.820" timestamp="1611225642188" />
-    <state x="326" y="173" key="Vcs.Push.Dialog.v2" timestamp="1611225862884">
+    <state width="1386" height="212" key="GridCell.Tab.0.bottom" timestamp="1611227316465">
       <screen x="0" y="23" width="1440" height="820" />
     </state>
-    <state x="326" y="173" key="Vcs.Push.Dialog.v2/0.23.1440.820@0.23.1440.820" timestamp="1611225862884" />
+    <state width="1386" height="212" key="GridCell.Tab.0.bottom/0.23.1440.820@0.23.1440.820" timestamp="1611227316465" />
+    <state width="1386" height="212" key="GridCell.Tab.0.center" timestamp="1611227316465">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state width="1386" height="212" key="GridCell.Tab.0.center/0.23.1440.820@0.23.1440.820" timestamp="1611227316465" />
+    <state width="1386" height="212" key="GridCell.Tab.0.left" timestamp="1611227316464">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state width="1386" height="212" key="GridCell.Tab.0.left/0.23.1440.820@0.23.1440.820" timestamp="1611227316464" />
+    <state width="1386" height="212" key="GridCell.Tab.0.right" timestamp="1611227316465">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state width="1386" height="212" key="GridCell.Tab.0.right/0.23.1440.820@0.23.1440.820" timestamp="1611227316465" />
+    <state x="150" y="94" key="MergeDialog" timestamp="1611228626855">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="150" y="94" key="MergeDialog/0.23.1440.820@0.23.1440.820" timestamp="1611228626855" />
+    <state x="326" y="173" key="Vcs.Push.Dialog.v2" timestamp="1611226980143">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="326" y="173" key="Vcs.Push.Dialog.v2/0.23.1440.820@0.23.1440.820" timestamp="1611226980143" />
     <state x="514" y="354" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611225761877">
       <screen x="0" y="23" width="1440" height="820" />
     </state>
     <state x="514" y="354" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.820@0.23.1440.820" timestamp="1611225761877" />
+    <state x="350" y="153" key="git4idea.branch.GitSmartOperationDialog" timestamp="1611228593142">
+      <screen x="0" y="23" width="1440" height="820" />
+    </state>
+    <state x="350" y="153" key="git4idea.branch.GitSmartOperationDialog/0.23.1440.820@0.23.1440.820" timestamp="1611228593142" />
     <state x="526" y="329" key="git4idea.remote.GitConfigureRemotesDialog" timestamp="1611225852962">
       <screen x="0" y="23" width="1440" height="820" />
     </state>
     <state x="526" y="329" key="git4idea.remote.GitConfigureRemotesDialog/0.23.1440.820@0.23.1440.820" timestamp="1611225852962" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/msci_project$msci.coverage" NAME=" Coverage Results" MODIFIED="1611227301810" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
 </project>
