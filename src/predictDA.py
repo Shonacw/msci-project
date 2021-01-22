@@ -3,13 +3,29 @@ import pandas as pd
 import pickle
 import re
 import os
-
+import importlib
 import tensorflow as tf
-from utils import get_embedding_matrix, get_tokenizer, \
-    make_model_readable_X, load_all_transcripts, merge_offset_arrays, load_one_transcript
-from bilstm_crf import get_bilstm_crf_model
-from mappings import get_id2tag, get_tag2full_label
-import config
+# from utils import get_embedding_matrix, get_tokenizer, \
+#     make_model_readable_X, load_all_transcripts, merge_offset_arrays, load_one_transcript
+#from bilstm_crf import get_bilstm_crf_model
+bilstm_crf = importlib.import_module("msci-project.src.bilstm_crf")
+get_bilstm_crf_model = bilstm_crf.get_bilstm_crf_model
+#from mappings import get_id2tag, get_tag2full_label
+mappings = importlib.import_module("msci-project.src.mappings")
+get_id2tag = mappings.get_id2tag
+get_tag2full_label = mappings.get_tag2full_label
+#import config
+config = importlib.import_module("msci-project.src.config")
+
+utils = importlib.import_module("msci-project.src.utils")
+get_embedding_matrix = utils.get_embedding_matrix
+get_tokenizer = utils.get_tokenizer
+make_model_readable_X = utils.make_model_readable_X
+load_all_transcripts = utils.load_all_transcripts
+load_all_transcripts = utils.load_all_transcripts
+merge_offset_arrays = utils.merge_offset_arrays
+load_one_transcript = utils.load_one_transcript
+#from utils import get_embedding_matrix, get_tokenizer, make_model_readable_X, load_all_transcripts, merge_offset_arrays, load_one_transcript
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"
 

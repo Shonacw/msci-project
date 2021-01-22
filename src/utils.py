@@ -9,8 +9,13 @@ import pandas as pd
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from swda import CorpusReader
-from mappings import get_id2tag
+import importlib
+swda = importlib.import_module("msci-project.src.swda")
+CorpusReader = swda.CorpusReader
+#from swda import CorpusReader
+#from mappings import get_id2tag
+mappings = importlib.import_module("msci-project.src.mappings")
+get_id2tag = mappings.get_id2tag
 
 def load_pretrained_glove(path):
     pkl_path = "../helper_files/glove.840B.300d.pkl"
@@ -235,15 +240,12 @@ def load_mrda_data(detail_level = 0):
             labels_list.append(ids)
     return utterances_list, labels_list
 
-def load_all_transcripts(transcript_dir = "../transcripts/", chunked = True,
-    chunk_size = 100, return_fnames=False):
-
+def load_all_transcripts(transcript_dir = "../transcripts/", chunked = True, chunk_size = 100, return_fnames=False):
     transcripts = []
     fnames = []
 
     for fpath in os.listdir(transcript_dir):
-        entries = load_one_transcript(transcript_dir + fpath,
-            chunked = chunked, chunk_size=chunk_size)
+        entries = load_one_transcript(transcript_dir + fpath, chunked = chunked, chunk_size=chunk_size)
         transcripts.append(entries)
         fnames.append(fpath.split(".")[-2])
 
@@ -271,11 +273,10 @@ def check_coverage(vocab,embeddings_index):
     print('Found embeddings for {:.2%} of vocab'.format(len(a) / len(vocab)))
     print('Found embeddings for  {:.2%} of all text'.format(k / (k + i)))
     sorted_x = sorted(oov.items(), key=operator.itemgetter(1))[::-1]
-
     return sorted_x
 
-
 def generate_confusion_matrix(data, predictions, metadata, verbose=False):
+
     # ONLY SHOWS FIRST 5!
     # Get label data
     labels = data['labels']
