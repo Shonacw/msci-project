@@ -1,0 +1,235 @@
+Index: src/predictDA.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\nimport pandas as pd\nimport pickle\nimport re\nimport os\n\nimport tensorflow as tf\nfrom utils import get_embedding_matrix, get_tokenizer, \\\n    make_model_readable_X, load_all_transcripts, merge_offset_arrays, load_one_transcript\nfrom bilstm_crf import get_bilstm_crf_model\nfrom mappings import get_id2tag, get_tag2full_label\nimport config\n\nos.environ[\"TF_FORCE_GPU_ALLOW_GROWTH\"]=\"true\"\n\nmax_nr_utterances = config.data[\"max_nr_utterances\"]\nmax_nr_words = config.data[\"max_nr_words\"]\ncorpus = config.corpus[\"corpus\"]\ndetail_level = config.corpus[\"detail_level\"]\n\ndef get_annotated_transcript(fname, force_rebuild = False):\n    '''\n    Wrapper for make_annotated_transcript, checks if df already exists and if so,\n    just loads instead of rebuilding.\n\n    PARAMS:\n        str fname: name, without file extension, of transcript file e.g. joe_rogan_elon_musk\n\n        Optional:\n        bool force_rebuild: rebuilds from scratch even if transcript_df already\n                            exists (default = False)\n    RETURNS:\n        pd.DataFrame transcript_df: annotated transcript\n    '''\n    #load from config\n    max_nr_utterances = config.data[\"max_nr_utterances\"]\n\n    transcript_dir = config.paths[\"transcripts\"]\n    df_dir = config.paths[\"transcript_dfs\"]\n\n    transcript_path = transcript_dir + fname + \".txt\"\n    df_path = df_dir + fname + \".csv\"\n\n    if not os.path.exists(df_path) or force_rebuild:\n        transcript = load_one_transcript(transcript_path,\n            chunked=True, chunk_size=max_nr_utterances)\n        transcript_df = make_annotated_transcript(transcript)\n        transcript_df.to_csv(df_path, index = False)\n    else:\n        transcript_df = pd.read_csv(df_path)\n\n    return transcript_df\n\ndef get_all_annotated_transcripts(force_rebuild=False):\n    '''\n    Wrapper for get_annotated_transcript, gets all transcripts at once\n    '''\n\n    transcript_dir = config.paths[\"transcripts\"]\n\n    transcript_dfs = []\n\n    for transcript_name in os.listdir(transcript_dir):\n        transcript_dfs.append(get_annotated_transcript(\n            transcript_name.split(\".\")[0], force_rebuild=force_rebuild))\n    return transcript_dfs\n\ndef make_annotated_transcript(transcript, verbose = False):\n    '''\n    Completes the end-to-end process for any given transcript.\n    =========================================================\n    PARAMS:\n        transcript: list of lists of strings (chunked transcript pieces)\n\n    OUTPUTS:\n        annotated_transcript: list of tuples (utterance, DA(utterance))\n    '''\n\n    transcript_text = [[e[0].lower() for e in chunk] for chunk in transcript]\n    total_nr_utterances = len(sum(transcript_text, []))\n    #get id2tag map and inverse\n    id2tag = get_id2tag(corpus, detail_level = detail_level)\n    tag2id = {t : id for id, t in id2tag.items()}\n    tag2full = get_tag2full_label(corpus, detail_level)\n    n_tags = len(tag2id.keys())\n\n    tokenizer = get_tokenizer(rebuild_from_all_texts=False) #TODO set to false for final model\n    word2id = tokenizer.word_index\n\n    X = make_model_readable_X(transcript_text, tokenizer, max_nr_utterances, max_nr_words)\n\n    # we create an offset version of the array so that we don't have contextless boundaries from chunking!\n    flattened_X = X.reshape((X.shape[0]*X.shape[1], X.shape[-1]))\n    offset_flattened_X = flattened_X[max_nr_utterances//2:-max_nr_utterances//2]\n    offset_X = offset_flattened_X.reshape((\n                    offset_flattened_X.shape[0]//max_nr_utterances,\n                    max_nr_utterances,\n                    offset_flattened_X.shape[-1]))\n\n    # import pretrained GloVe embeddings\n\n    #WARNING: if you force rebuild, the embedding matrix may change and you may need to retrain the Neural Network!\n    embedding_matrix = get_embedding_matrix(\"../data/embeddings/glove.840B.300d.txt\",\n        word2id, force_rebuild=False) #set force rebuild to False when not changing total vocabulary\n\n    os.environ[\"TF_FORCE_GPU_ALLOW_GROWTH\"]=\"true\"\n\n    model = get_bilstm_crf_model(embedding_matrix, max_nr_utterances, max_nr_words, n_tags)\n\n    data_name = corpus + \"_detail_\" + str(detail_level)\n    checkpoint_path = \"../trained_model/bilstm_crf/ckpt_\" + data_name + \".hdf5\"\n    if os.path.exists(checkpoint_path):\n        if verbose:\n            print(\"loading trained weights...\")\n        model.load_weights(checkpoint_path)\n        if verbose:\n            print(\"Done!\")\n    else:\n        print(\"Warning: no model found in path, using untrained model!\")\n\n    if verbose:\n        print(\"Making annotations...\")\n    y_hat = model.predict(X, batch_size=1).flatten()\n    y_hat_offset = model.predict(offset_X, batch_size=1).flatten()\n\n    y_hat = merge_offset_arrays(y_hat, y_hat_offset, step = max_nr_utterances//2)\n    y_hat = [tag2full[id2tag[id]] for id in y_hat]\n\n    y_hat = y_hat[:total_nr_utterances] #remove trailing 0's from padding\n\n    u_joined_y_hat = []\n    for t, y_hat_batch in zip(transcript_text, y_hat):\n        u_joined_y_hat.append(tuple(zip(t, y_hat_batch)))\n\n    #return annotated transcript\n    if verbose:\n        print(\"Done!\")\n    transcript_df = pd.DataFrame.from_records(sum(transcript, []),\n        columns = [\"utterance\", \"speaker\", \"timestamp\"])\n\n    transcript_df[\"da_label\"] = y_hat\n\n    return transcript_df\n\nif __name__ == '__main__':\n    #transcripts = load_all_transcripts(chunked=True, chunk_size=max_nr_utterances)\n    annotated_transcripts = get_all_annotated_transcripts(force_rebuild=False)\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/predictDA.py	(revision b623768bc95ae68dd2776d192403c7bc4c997c52)
++++ src/predictDA.py	(date 1611227222613)
+@@ -5,8 +5,7 @@
+ import os
+ 
+ import tensorflow as tf
+-from utils import get_embedding_matrix, get_tokenizer, \
+-    make_model_readable_X, load_all_transcripts, merge_offset_arrays, load_one_transcript
++from utils import get_embedding_matrix, get_tokenizer, make_model_readable_X, load_all_transcripts, merge_offset_arrays, load_one_transcript
+ from bilstm_crf import get_bilstm_crf_model
+ from mappings import get_id2tag, get_tag2full_label
+ import config
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/modules.xml	(date 1611227680847)
++++ .idea/modules.xml	(date 1611227680847)
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/.idea/msci-project.iml" filepath="$PROJECT_DIR$/.idea/msci-project.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/vcs.xml	(date 1611227680833)
++++ .idea/vcs.xml	(date 1611227680833)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/inspectionProfiles/profiles_settings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/inspectionProfiles/profiles_settings.xml	(date 1611227680868)
++++ .idea/inspectionProfiles/profiles_settings.xml	(date 1611227680868)
+@@ -0,0 +1,6 @@
++<component name="InspectionProjectProfileManager">
++  <settings>
++    <option name="USE_PROJECT_PROFILE" value="false" />
++    <version value="1.0" />
++  </settings>
++</component>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"a3177542-c8f9-41c0-8834-0303be7c15a9\" name=\"Default Changelist\" comment=\"trying merge\">\n      <change afterPath=\"$PROJECT_DIR$/.idea/misc.xml\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/.idea/msci-project.iml\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\n    </list>\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"Git.Settings\">\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\n      <map>\n        <entry key=\"$PROJECT_DIR$\" value=\"jonas-scholz123-master\" />\n      </map>\n    </option>\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\n  </component>\n  <component name=\"ProjectId\" id=\"1mhHSXMJIq1vaU1vtwP5WMtbBdF\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\">\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\n    <property name=\"RunOnceActivity.ShowReadmeOnStart\" value=\"true\" />\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\n    <property name=\"last_opened_file_path\" value=\"$PROJECT_DIR$\" />\n    <property name=\"nodejs_package_manager_path\" value=\"npm\" />\n  </component>\n  <component name=\"RunManager\">\n    <configuration name=\"msci\" type=\"PythonConfigurationType\" factoryName=\"Python\">\n      <module name=\"msci-project\" />\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\n      <option name=\"PARENT_ENVS\" value=\"true\" />\n      <envs>\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\n      </envs>\n      <option name=\"SDK_HOME\" value=\"$USER_HOME$/opt/anaconda3/envs/opencv4/bin/python\" />\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/..\" />\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$\" />\n      <option name=\"PARAMETERS\" value=\"\" />\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\n      <option name=\"MODULE_MODE\" value=\"false\" />\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\n      <option name=\"INPUT_FILE\" value=\"\" />\n      <method v=\"2\" />\n    </configuration>\n  </component>\n  <component name=\"SvnConfiguration\">\n    <configuration />\n  </component>\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"a3177542-c8f9-41c0-8834-0303be7c15a9\" name=\"Default Changelist\" comment=\"\" />\n      <created>1609938902505</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1609938902505</updated>\n      <workItem from=\"1609938903864\" duration=\"2000\" />\n      <workItem from=\"1611225442344\" duration=\"1228000\" />\n    </task>\n    <task id=\"LOCAL-00001\" summary=\"deleted files\">\n      <created>1611225690367</created>\n      <option name=\"number\" value=\"00001\" />\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1611225690367</updated>\n    </task>\n    <task id=\"LOCAL-00002\" summary=\"?\">\n      <created>1611226299821</created>\n      <option name=\"number\" value=\"00002\" />\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1611226299821</updated>\n    </task>\n    <option name=\"localTasksCounter\" value=\"3\" />\n    <servers />\n  </component>\n  <component name=\"TypeScriptGeneratedFilesManager\">\n    <option name=\"version\" value=\"2\" />\n  </component>\n  <component name=\"VcsManagerConfiguration\">\n    <MESSAGE value=\"Merge branch 'master' of https://github.com/jonas-scholz123/msci-project&#10;&#10;# Conflicts:&#10;#&#9;src/predictDA.py&#10;#&#9;src/topics.py&#10;#&#9;src/utils.py\" />\n    <MESSAGE value=\"-\" />\n    <MESSAGE value=\"deleted files\" />\n    <MESSAGE value=\"?\" />\n    <MESSAGE value=\"trying merge\" />\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"trying merge\" />\n  </component>\n  <component name=\"WindowStateProjectService\">\n    <state x=\"190\" y=\"95\" key=\"#com.intellij.execution.impl.EditConfigurationsDialog\" timestamp=\"1611226864471\">\n      <screen x=\"0\" y=\"23\" width=\"1440\" height=\"820\" />\n    </state>\n    <state x=\"190\" y=\"95\" key=\"#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.820@0.23.1440.820\" timestamp=\"1611226864471\" />\n    <state x=\"155\" y=\"23\" key=\"CommitChangelistDialog2\" timestamp=\"1611226585981\">\n      <screen x=\"0\" y=\"23\" width=\"1440\" height=\"820\" />\n    </state>\n    <state x=\"155\" y=\"23\" key=\"CommitChangelistDialog2/0.23.1440.820@0.23.1440.820\" timestamp=\"1611226585981\" />\n    <state x=\"150\" y=\"94\" key=\"DiffContextDialog\" timestamp=\"1611225642188\">\n      <screen x=\"0\" y=\"23\" width=\"1440\" height=\"820\" />\n    </state>\n    <state x=\"150\" y=\"94\" key=\"DiffContextDialog/0.23.1440.820@0.23.1440.820\" timestamp=\"1611225642188\" />\n    <state x=\"326\" y=\"173\" key=\"Vcs.Push.Dialog.v2\" timestamp=\"1611225862884\">\n      <screen x=\"0\" y=\"23\" width=\"1440\" height=\"820\" />\n    </state>\n    <state x=\"326\" y=\"173\" key=\"Vcs.Push.Dialog.v2/0.23.1440.820@0.23.1440.820\" timestamp=\"1611225862884\" />\n    <state x=\"514\" y=\"354\" key=\"com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2\" timestamp=\"1611225761877\">\n      <screen x=\"0\" y=\"23\" width=\"1440\" height=\"820\" />\n    </state>\n    <state x=\"514\" y=\"354\" key=\"com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.820@0.23.1440.820\" timestamp=\"1611225761877\" />\n    <state x=\"526\" y=\"329\" key=\"git4idea.remote.GitConfigureRemotesDialog\" timestamp=\"1611225852962\">\n      <screen x=\"0\" y=\"23\" width=\"1440\" height=\"820\" />\n    </state>\n    <state x=\"526\" y=\"329\" key=\"git4idea.remote.GitConfigureRemotesDialog/0.23.1440.820@0.23.1440.820\" timestamp=\"1611225852962\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/workspace.xml	(revision b623768bc95ae68dd2776d192403c7bc4c997c52)
++++ .idea/workspace.xml	(date 1611228392302)
+@@ -1,10 +1,13 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="a3177542-c8f9-41c0-8834-0303be7c15a9" name="Default Changelist" comment="trying merge">
+-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/msci-project.iml" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++    <list default="true" id="a3177542-c8f9-41c0-8834-0303be7c15a9" name="Default Changelist" comment="">
++      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/msci-project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/msci-project.iml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/predictDA.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/predictDA.py" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -27,12 +30,13 @@
+   <component name="PropertiesComponent">
+     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
++    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+     <property name="WebServerToolWindowFactoryState" value="false" />
+     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+     <property name="nodejs_package_manager_path" value="npm" />
+   </component>
+   <component name="RunManager">
+-    <configuration name="msci" type="PythonConfigurationType" factoryName="Python">
++    <configuration type="PythonConfigurationType" factoryName="Python">
+       <module name="msci-project" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+       <option name="PARENT_ENVS" value="true" />
+@@ -40,12 +44,12 @@
+         <env name="PYTHONUNBUFFERED" value="1" />
+       </envs>
+       <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/opencv4/bin/python" />
+-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.." />
++      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+       <option name="IS_MODULE_SDK" value="false" />
+       <option name="ADD_CONTENT_ROOTS" value="true" />
+       <option name="ADD_SOURCE_ROOTS" value="true" />
+       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$" />
++      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/predictDA.py" />
+       <option name="PARAMETERS" value="" />
+       <option name="SHOW_COMMAND_LINE" value="false" />
+       <option name="EMULATE_TERMINAL" value="false" />
+@@ -66,7 +70,8 @@
+       <option name="presentableId" value="Default" />
+       <updated>1609938902505</updated>
+       <workItem from="1609938903864" duration="2000" />
+-      <workItem from="1611225442344" duration="1228000" />
++      <workItem from="1611225442344" duration="1679000" />
++      <workItem from="1611227678456" duration="668000" />
+     </task>
+     <task id="LOCAL-00001" summary="deleted files">
+       <created>1611225690367</created>
+@@ -82,7 +87,14 @@
+       <option name="project" value="LOCAL" />
+       <updated>1611226299821</updated>
+     </task>
+-    <option name="localTasksCounter" value="3" />
++    <task id="LOCAL-00003" summary="-">
++      <created>1611226965435</created>
++      <option name="number" value="00003" />
++      <option name="presentableId" value="LOCAL-00003" />
++      <option name="project" value="LOCAL" />
++      <updated>1611226965435</updated>
++    </task>
++    <option name="localTasksCounter" value="4" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -90,29 +102,45 @@
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="Merge branch 'master' of https://github.com/jonas-scholz123/msci-project&#10;&#10;# Conflicts:&#10;#&#9;src/predictDA.py&#10;#&#9;src/topics.py&#10;#&#9;src/utils.py" />
+-    <MESSAGE value="-" />
+     <MESSAGE value="deleted files" />
+     <MESSAGE value="?" />
+     <MESSAGE value="trying merge" />
+-    <option name="LAST_COMMIT_MESSAGE" value="trying merge" />
++    <MESSAGE value="-" />
++    <option name="LAST_COMMIT_MESSAGE" value="-" />
+   </component>
+   <component name="WindowStateProjectService">
+-    <state x="190" y="95" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1611226864471">
++    <state x="190" y="95" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1611227286708">
+       <screen x="0" y="23" width="1440" height="820" />
+     </state>
+-    <state x="190" y="95" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.820@0.23.1440.820" timestamp="1611226864471" />
+-    <state x="155" y="23" key="CommitChangelistDialog2" timestamp="1611226585981">
++    <state x="190" y="95" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.820@0.23.1440.820" timestamp="1611227286708" />
++    <state x="155" y="23" key="CommitChangelistDialog2" timestamp="1611226965293">
+       <screen x="0" y="23" width="1440" height="820" />
+     </state>
+-    <state x="155" y="23" key="CommitChangelistDialog2/0.23.1440.820@0.23.1440.820" timestamp="1611226585981" />
++    <state x="155" y="23" key="CommitChangelistDialog2/0.23.1440.820@0.23.1440.820" timestamp="1611226965293" />
+     <state x="150" y="94" key="DiffContextDialog" timestamp="1611225642188">
+       <screen x="0" y="23" width="1440" height="820" />
+     </state>
+     <state x="150" y="94" key="DiffContextDialog/0.23.1440.820@0.23.1440.820" timestamp="1611225642188" />
+-    <state x="326" y="173" key="Vcs.Push.Dialog.v2" timestamp="1611225862884">
++    <state width="1386" height="212" key="GridCell.Tab.0.bottom" timestamp="1611227316465">
+       <screen x="0" y="23" width="1440" height="820" />
+     </state>
+-    <state x="326" y="173" key="Vcs.Push.Dialog.v2/0.23.1440.820@0.23.1440.820" timestamp="1611225862884" />
++    <state width="1386" height="212" key="GridCell.Tab.0.bottom/0.23.1440.820@0.23.1440.820" timestamp="1611227316465" />
++    <state width="1386" height="212" key="GridCell.Tab.0.center" timestamp="1611227316465">
++      <screen x="0" y="23" width="1440" height="820" />
++    </state>
++    <state width="1386" height="212" key="GridCell.Tab.0.center/0.23.1440.820@0.23.1440.820" timestamp="1611227316465" />
++    <state width="1386" height="212" key="GridCell.Tab.0.left" timestamp="1611227316464">
++      <screen x="0" y="23" width="1440" height="820" />
++    </state>
++    <state width="1386" height="212" key="GridCell.Tab.0.left/0.23.1440.820@0.23.1440.820" timestamp="1611227316464" />
++    <state width="1386" height="212" key="GridCell.Tab.0.right" timestamp="1611227316465">
++      <screen x="0" y="23" width="1440" height="820" />
++    </state>
++    <state width="1386" height="212" key="GridCell.Tab.0.right/0.23.1440.820@0.23.1440.820" timestamp="1611227316465" />
++    <state x="326" y="173" key="Vcs.Push.Dialog.v2" timestamp="1611226980143">
++      <screen x="0" y="23" width="1440" height="820" />
++    </state>
++    <state x="326" y="173" key="Vcs.Push.Dialog.v2/0.23.1440.820@0.23.1440.820" timestamp="1611226980143" />
+     <state x="514" y="354" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611225761877">
+       <screen x="0" y="23" width="1440" height="820" />
+     </state>
+@@ -122,4 +150,7 @@
+     </state>
+     <state x="526" y="329" key="git4idea.remote.GitConfigureRemotesDialog/0.23.1440.820@0.23.1440.820" timestamp="1611225852962" />
+   </component>
++  <component name="com.intellij.coverage.CoverageDataManagerImpl">
++    <SUITE FILE_PATH="coverage/msci_project$msci.coverage" NAME=" Coverage Results" MODIFIED="1611227301810" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
++  </component>
+ </project>
+\ No newline at end of file
+Index: .idea/msci-project.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<module type=\"PYTHON_MODULE\" version=\"4\">\n  <component name=\"NewModuleRootManager\">\n    <content url=\"file://$MODULE_DIR$\" />\n    <orderEntry type=\"jdk\" jdkName=\"Python 3.8 (opencv4)\" jdkType=\"Python SDK\" />\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\n  </component>\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/msci-project.iml	(revision b623768bc95ae68dd2776d192403c7bc4c997c52)
++++ .idea/msci-project.iml	(date 1611228090228)
+@@ -2,7 +2,11 @@
+ <module type="PYTHON_MODULE" version="4">
+   <component name="NewModuleRootManager">
+     <content url="file://$MODULE_DIR$" />
+-    <orderEntry type="jdk" jdkName="Python 3.8 (opencv4)" jdkType="Python SDK" />
++    <orderEntry type="inheritedJdk" />
+     <orderEntry type="sourceFolder" forTests="false" />
+   </component>
++  <component name="PyDocumentationSettings">
++    <option name="format" value="PLAIN" />
++    <option name="myDocStringFormat" value="Plain" />
++  </component>
+ </module>
+\ No newline at end of file
